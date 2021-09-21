@@ -233,23 +233,95 @@ class DataClass:
 
                     self.loss_result.append(self.loss(p,self.train_idx))
                     self.loss_validation_result.append(self.loss(p,self.val_idx))
-                    if t % 1000 == 0:
-                        print(t)
-                        print(dl_list)
-                        print(p)
-        
+                    # if t % 1000 == 0:
+                    #     print(t)
+                    #     print(dl_list)
+                    #     print(p)
+          
+
+        if algo == 'GD_mom':
+            t_max = 50000
+            dp = 0.0001
+            p = np.random.uniform(0.5,1,size = NFIT)
+            self.loss_result = []
+            self.loss_validation_result = []
+            if method == 'batch':
+                for t in range(0,t_max):
+                    dl_result = []
+                    p_last_iteration = copy.deepcopy(p)
+                    for i in range(len(p)):
+                        p[i] = p[i] + dp
+                        dl_result.append((self.loss(p,self.train_idx)-self.loss(p_last_iteration,self.train_idx))/dp) 
+                    for i in range(len(dl_result)):
+                        dl_result[i] = dl_result[i] *  LR 
+                    gd_p = dl_result
+                    for j in range(len(p)):
+                        p = p_last_iteration - gd_p 
+                        p[i] = p[i] + dp * 0.03
+                    self.loss_result.append(self.loss(p,self.train_idx))
+                    self.loss_validation_result.append(self.loss(p,self.val_idx))
+
+            if method == 'mini_batch':
+                first_half_idx = self.train_idx[self.train_idx%2==1]
+                second_half_idx = self.train_idx[self.train_idx%2!=1]
+                for t in range(0,t_max):
+                    dl_result_first_half = []
+                    dl_result_second_half = []
+                    p_last_iteration = copy.deepcopy(p)
+                    for i in range(len(p)):
+                        p[i] = p[i] + dp 
+                        dl_result_first_half.append((self.loss(p,first_half_idx) - self.loss(p_last_iteration,first_half_idx))/dp)
+                    for i in range(len(dl_result_first_half)):
+                        dl_result_first_half[i] = dl_result_first_half[i] * LR
+                    gd_p = dl_result_first_half
+                    for j in range(len(p)):
+                        p_after_first_half = p_last_iteration - gd_p  
+                        p_after_first_half[i] = p_after_first_half[i] + dp * 0.03
 
 
+                    p = copy.deepcopy(p_after_first_half)  #need a new copy to modify
+                    for i in range(len(p)):
+                        p[i] = p[i] +  dp
+                        dl_result_second_half.append((self.loss(p,second_half_idx) - self.loss(p_after_first_half,second_half_idx))/dp)
+                    for i in range(len(dl_result_second_half)):
+                        dl_result_second_half[i] = dl_result_second_half[i] * LR
+                    gd_p = dl_result_second_half
 
+                    for j in range(len(p)):
+                        p = p_after_first_half - gd_p
+                        p[i] = p[i] + dp * 0.03
+                    self.loss_result.append(self.loss(p,self.train_idx))
+                    self.loss_validation_result.append(self.loss(p,self.val_idx))
 
-        return p   
+            if method == 'stochastic':
+                for t in range(0,t_max):
+                    np.random.shuffle(self.train_idx)
+                    for x in self.train_idx:
+                        dl_list = []
+                        loss = np.mean((self.model(self.X[x],p) - self.Y[x])**2 )
+                        p_last_iteration = copy.deepcopy(p)
 
+                        for i in range(len(p)):
+                            p[i] = p[i] + dp 
+                            dl_list.append((np.mean((self.model(self.X[x],p) - self.Y[x]))**2 - loss ) / dp)
+                        
+                        for  i in range(len(dl_list)):
+                            dl_list[i] = dl_list[i] * LR
+                        gd_p = dl_list
+                        for j in range(len(p)):
+                            p = p_last_iteration - gd_p 
+                            p[i] = p[i] + dp*0.03
+
+                    self.loss_result.append(self.loss(p,self.train_idx))
+                    self.loss_validation_result.append(self.loss(p,self.val_idx))
+
+        return p 
 #------------------------
 #MAIN 
 #------------------------
 
-method = 'batch'
-# method = 'mini_batch'
+# method = 'batch'
+method = 'mini_batch'
 # method = 'stochastic'
 D=DataClass(INPUT_FILE)		#INITIALIZE DATA OBJECT 
 D.report()					#BASIC DATA PRESCREENING

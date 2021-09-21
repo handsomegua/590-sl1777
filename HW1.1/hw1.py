@@ -165,7 +165,7 @@ plt.show()
 
 
 # Logistic Regression for classification case
-data_1 = Data('weight.json','classification')
+data_1 = Dat·a('weight.json','classification')
 data_1.visualization()
 x_train, x_test, y_train, y_test = data_1.train_test_split(0.2)
 
