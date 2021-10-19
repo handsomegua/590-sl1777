@@ -105,12 +105,12 @@ def model_building():
     model.add(layers.MaxPooling2D((2,2)))
     #Flatten our convnet
     model.add(layers.Flatten())
+    model.add(layers.Dropout(0.5))
     #Add a DFF network of 512 neuron
     model.add(layers.Dense(512, activation='relu'))
     #Output layer with 1 output node and sigmoid activation
     model.add(layers.Dense(1, activation='sigmoid'))
     #Show the summary of our CNN network
-    model.summary()
     #Compile the model
     model.compile(loss='binary_crossentropy',
                 optimizer='rmsprop',
@@ -130,7 +130,7 @@ validation_generator = test_scale.flow_from_directory(validation_dir,target_size
 
 
 #fit eh model 
-history = model.fit_generator(train_generator,steps_per_epoch=100,epochs=30,validation_data=validation_generator,validation_steps=50)
+history = model.fit_generator(train_generator,steps_per_epoch=20,epochs=3,validation_data=validation_generator,validation_steps=10)
 model.save('cats_and_dogs_small_1.h5')
 
 
@@ -162,7 +162,7 @@ img_tensor = np.expand_dims(img_tensor,axis = 0)
 img_tensor /= 255 
 
 
-layer_outputs = [layer.output for layers in model.layers[:4]]
+layer_outputs = [layers.output for layers in model.layers[:4]]
 activation_model = models.Model(inputs=model.input, outputs=layer_outputs)
 activations = activation_model.predict(img_tensor)
 first_layer_activation = activations[0]
