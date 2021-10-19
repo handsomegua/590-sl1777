@@ -1,7 +1,7 @@
 
 #Flags 
-CNN = False 
-DFF_ANN = True 
+CNN = True 
+DFF_ANN = False 
 folds = 5 
 
 #data 
