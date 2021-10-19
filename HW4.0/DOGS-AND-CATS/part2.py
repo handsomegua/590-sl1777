@@ -123,35 +123,14 @@ model = model_building()
 from keras.preprocessing.image import ImageDataGenerator
 from keras.preprocessing import image
 
+train_scale = ImageDataGenerator(rescale=1./255)
+test_scale = ImageDataGenerator(rescale=1./255)
+train_generator = train_scale.flow_from_directory(train_dir, target_size = (150,150), batch_size = 32,class_mode = 'binary')
+validation_generator = test_scale.flow_from_directory(validation_dir,target_size = (150,150),batch_size = 32,class_mode = 'binary')
 
-# define the generator function 
-def generator():
-    #Rescale image size
-    train_datagen = ImageDataGenerator(rescale=1./255)
-    test_datagen = ImageDataGenerator(rescale=1./255)
-    #define a generator for train and validation datasets
-    train_generator = train_datagen.flow_from_directory(train_dir,
-                                                    target_size = (150,150),
-                                                    batch_size = 32,
-                                                    class_mode = 'binary')
-    validation_generator = test_datagen.flow_from_directory(validation_dir,
-                                                    target_size = (150,150),
-                                                    batch_size = 32,
-                                                    class_mode = 'binary')
-    return train_generator, validation_generator
 
-train_generator, validation_generator = generator()
-
-#Define a fit function
-def fit(): 
-    #fit function
-    history = model.fit_generator(train_generator,
-                                  steps_per_epoch=100,
-                                  epochs=30,
-                                  validation_data=validation_generator,
-                                  validation_steps=50)
-    return history
-history = fit()
+#fit eh model 
+history = model.fit_generator(train_generator,steps_per_epoch=100,epochs=30,validation_data=validation_generator,validation_steps=50)
 model.save('cats_and_dogs_small_1.h5')
 
 
