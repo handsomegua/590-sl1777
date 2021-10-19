@@ -11,6 +11,7 @@ Metric = ['accuracy']
 default = "mnist_fashion"
 model_name = "ourmodel"
 model_load = False
+model_save = False
 
 #MODIFIED FROM CHOLLETT P120 
 import matplotlib.pyplot as plt
