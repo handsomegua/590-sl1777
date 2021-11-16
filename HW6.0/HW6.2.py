@@ -52,3 +52,23 @@ plt.title("Training and validation loss")
 plt.legend()
 plt.savefig('HW6.2_history.png')
 plt.show()
+
+
+
+# fashion data 
+from tensorflow.keras.datasets import fashion_mnist
+(train_data_f, train_label_f),(test_data_f,test_label_f) = mnist.load_data()
+
+train_data_f = train_data_f/255
+
+threshold = 4 * autoencoder.evaluate(train_data,train_data)
+
+predict_result = autoencoder.predict(train_data_f)
+
+count = 0  #number of anomaly number
+for i in range(train_data_f.shape[0]):
+    if np.mean((train_data_f[i] - predict_result[i])**2) > threshold:
+        count += 1
+        
+print('anomaly propotion; ',count / train_data_f.shape[0])
+
